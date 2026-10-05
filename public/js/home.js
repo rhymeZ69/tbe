@@ -227,3 +227,131 @@ if (form) {
 /* ---------- Footer year ---------- */
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+/* ============================================================
+   PRODUCT CARD CAROUSEL
+   ============================================================ */
+(function () {
+  document.querySelectorAll('[data-carousel]').forEach(carousel => {
+    const slides  = carousel.querySelectorAll('.prod-carousel__slide');
+    const dots    = carousel.querySelectorAll('[data-carousel-dot]');
+    const prevBtn = carousel.querySelector('[data-carousel-prev]');
+    const nextBtn = carousel.querySelector('[data-carousel-next]');
+
+    // Nothing to cycle through
+    if (slides.length <= 1) return;
+
+    let current = 0;
+
+    function goTo(index) {
+      // Wrap around
+      if (index < 0) index = slides.length - 1;
+      if (index >= slides.length) index = 0;
+      if (index === current) return;
+
+      // Toggle slides
+      slides[current].classList.remove('is-active');
+      slides[index].classList.add('is-active');
+
+      // Toggle dots
+      if (dots[current]) dots[current].classList.remove('is-active');
+      if (dots[index])   dots[index].classList.add('is-active');
+
+      current = index;
+    }
+
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    /* Arrows */
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        prev();
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        next();
+      });
+    }
+
+    /* Dots */
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        goTo(i);
+      });
+    });
+
+    /* Touch swipe */
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX   = 0;
+
+    carousel.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    carousel.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diffX = touchStartX - touchEndX;
+      const diffY = touchStartY - e.changedTouches[0].screenY;
+
+      // Only swipe if horizontal movement dominates
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+        if (diffX > 0) next();   // swiped left → next
+        else prev();             // swiped right → prev
+      }
+    }, { passive: true });
+  });
+})();
+
+
+//-----------------------
+/* ============================================================
+   NAV DROPDOWN (mobile tap-to-open + desktop keyboard)
+   ============================================================ */
+(function () {
+  const dropdowns = document.querySelectorAll('.has-dropdown');
+
+  dropdowns.forEach(drop => {
+    const trigger = drop.querySelector('.nav-dropdown-trigger');
+    if (! trigger) return;
+
+    // Toggle on click — needed on mobile, harmless on desktop
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isOpen = drop.classList.toggle('is-open');
+      trigger.setAttribute('aria-expanded', isOpen);
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (! drop.contains(e.target)) {
+        drop.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Close with Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        drop.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+
+  // Close dropdown when a link inside is clicked (mobile menu)
+  document.querySelectorAll('.nav-dropdown__item').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('.has-dropdown').forEach(d => d.classList.remove('is-open'));
+    });
+  });
+})();

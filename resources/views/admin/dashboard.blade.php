@@ -8,7 +8,8 @@
 
 {{-- ================= STAT CARDS ================= --}}
 <div class="stat-grid">
-  <div class="stat-card stat-card--gold">
+
+  <a href="{{ route('admin.enquiries.index', ['status' => 'new']) }}" class="stat-card stat-card--gold">
     <div class="stat-card__icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg>
     </div>
@@ -17,9 +18,13 @@
       <div class="stat-card__value">{{ $stats['new_enquiries'] }}</div>
       <span class="stat-card__hint">{{ $stats['enquiries_this_month'] }} this month</span>
     </div>
-  </div>
+  </a>
 
-  <div class="stat-card stat-card--blue">
+  @if (Route::has('admin.messages.index'))
+    <a href="{{ route('admin.messages.index', ['filter' => 'unread']) }}" class="stat-card stat-card--blue">
+  @else
+    <div class="stat-card stat-card--blue">
+  @endif
     <div class="stat-card__icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/></svg>
     </div>
@@ -28,9 +33,13 @@
       <div class="stat-card__value">{{ $stats['unread_messages'] }}</div>
       <span class="stat-card__hint">{{ $stats['total_messages'] }} total received</span>
     </div>
-  </div>
+  @if (Route::has('admin.messages.index'))
+    </a>
+  @else
+    </div>
+  @endif
 
-  <div class="stat-card stat-card--green">
+  <a href="{{ route('admin.newsletter.index') }}" class="stat-card stat-card--green">
     <div class="stat-card__icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
     </div>
@@ -39,9 +48,9 @@
       <div class="stat-card__value">{{ $stats['subscribers'] }}</div>
       <span class="stat-card__hint">Active newsletter list</span>
     </div>
-  </div>
+  </a>
 
-  <div class="stat-card stat-card--purple">
+  <a href="{{ route('admin.products.index') }}" class="stat-card stat-card--purple">
     <div class="stat-card__icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.7l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.7l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
     </div>
@@ -50,32 +59,32 @@
       <div class="stat-card__value">{{ $stats['products'] }}</div>
       <span class="stat-card__hint">Across {{ $stats['categories'] }} categories</span>
     </div>
-  </div>
+  </a>
 </div>
 
 {{-- ================= SECONDARY STATS ================= --}}
 <div class="mini-stat-grid">
-  <a href="#" class="mini-stat">
+  <a href="{{ route('admin.video-tours.index') }}" class="mini-stat">
     <span class="mini-stat__value">{{ $stats['video_tours'] }}</span>
     <span class="mini-stat__label">Video Tours</span>
   </a>
-  <a href="#" class="mini-stat">
+  <a href="{{ route('admin.countries.index', ['filter' => 'gcc']) }}" class="mini-stat">
     <span class="mini-stat__value">{{ $stats['gcc_markets'] }}</span>
     <span class="mini-stat__label">GCC Markets</span>
   </a>
-  <a href="#" class="mini-stat">
+  <a href="{{ route('admin.certifications.index') }}" class="mini-stat">
     <span class="mini-stat__value">{{ $stats['certifications'] }}</span>
     <span class="mini-stat__label">Certifications</span>
   </a>
-  <a href="#" class="mini-stat">
+  <a href="{{ route('admin.testimonials.index') }}" class="mini-stat">
     <span class="mini-stat__value">{{ $stats['testimonials'] }}</span>
     <span class="mini-stat__label">Testimonials</span>
   </a>
-  <a href="#" class="mini-stat">
+  <a href="{{ route('admin.pages.index', ['filter' => 'published']) }}" class="mini-stat">
     <span class="mini-stat__value">{{ $stats['published_pages'] }}</span>
     <span class="mini-stat__label">Published Pages</span>
   </a>
-  <a href="#" class="mini-stat">
+  <a href="{{ route('admin.banners.index', ['filter' => 'active']) }}" class="mini-stat">
     <span class="mini-stat__value">{{ $stats['active_banners'] }}</span>
     <span class="mini-stat__label">Active Banners</span>
   </a>
@@ -91,7 +100,7 @@
         <h2>Recent Quote Enquiries</h2>
         <p>Latest {{ $recentEnquiries->count() }} submissions from your website</p>
       </div>
-      <a href="#" class="btn-link">View all
+      <a href="{{ route('admin.enquiries.index') }}" class="btn-link">View all
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
     </header>
@@ -117,7 +126,11 @@
           <tbody>
             @foreach($recentEnquiries as $enquiry)
               <tr>
-                <td><span class="ref">{{ $enquiry->reference }}</span></td>
+                <td>
+                  <a href="{{ route('admin.enquiries.show', $enquiry) }}" class="ref-link">
+                    <span class="ref">{{ $enquiry->reference }}</span>
+                  </a>
+                </td>
                 <td>
                   <div class="cell-primary">{{ $enquiry->name }}</div>
                   @if($enquiry->company)
@@ -156,6 +169,9 @@
         <h2>Enquiries Trend</h2>
         <p>Last 6 months</p>
       </div>
+      <a href="{{ route('admin.enquiries.index') }}" class="btn-link">Details
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
     </header>
 
     @php $maxCount = max(1, max($enquiriesByMonth ?: [0])); @endphp
@@ -180,7 +196,11 @@
         <h2>Recent Messages</h2>
         <p>From the contact form</p>
       </div>
-      <a href="#" class="btn-link">Inbox</a>
+      @if (Route::has('admin.messages.index'))
+        <a href="{{ route('admin.messages.index') }}" class="btn-link">Inbox
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      @endif
     </header>
 
     @if($recentMessages->isEmpty())
@@ -214,6 +234,9 @@
         <h2>Pipeline</h2>
         <p>Enquiries by status</p>
       </div>
+      <a href="{{ route('admin.enquiries.index') }}" class="btn-link">Open
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
     </header>
 
     @if(empty($enquiriesByStatus))
@@ -226,7 +249,9 @@
         @foreach($statusLabels as $key => $label)
           @php $count = $enquiriesByStatus[$key] ?? 0; @endphp
           <li class="pipeline__row">
-            <span class="status status--{{ $key }}">{{ $label }}</span>
+            <a href="{{ route('admin.enquiries.index', ['status' => $key]) }}" class="pipeline__link">
+              <span class="status status--{{ $key }}">{{ $label }}</span>
+            </a>
             <div class="pipeline__bar">
               <div class="pipeline__bar-fill pipeline__bar-fill--{{ $key }}"
                    style="width: {{ $stats['total_enquiries'] ? ($count / $stats['total_enquiries']) * 100 : 0 }}%">
@@ -246,6 +271,9 @@
         <h2>Top Destinations</h2>
         <p>Where your enquiries come from</p>
       </div>
+      <a href="{{ route('admin.countries.index') }}" class="btn-link">All
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
     </header>
 
     @if($topCountries->isEmpty())
@@ -257,9 +285,11 @@
       <ul class="country-list">
         @foreach($topCountries as $country)
           <li>
-            <span class="flag-emoji">{{ $country->flag_emoji }}</span>
-            <span class="country-list__name">{{ $country->name }}</span>
-            <span class="country-list__count">{{ $country->enquiries_count }}</span>
+            <a href="{{ route('admin.enquiries.index', ['country' => $country->id]) }}" class="country-list__link">
+              <span class="flag-emoji">{{ $country->flag_emoji }}</span>
+              <span class="country-list__name">{{ $country->name }}</span>
+              <span class="country-list__count">{{ $country->enquiries_count }}</span>
+            </a>
           </li>
         @endforeach
       </ul>
@@ -273,6 +303,9 @@
         <h2>Latest Subscribers</h2>
         <p>Newsletter sign-ups</p>
       </div>
+      <a href="{{ route('admin.newsletter.index') }}" class="btn-link">All
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
     </header>
 
     @if($recentSubscribers->isEmpty())
@@ -306,27 +339,27 @@
     </header>
 
     <div class="quick-actions">
-      <a href="#" class="quick-action">
+      <a href="{{ route('admin.products.create') }}" class="quick-action">
         <div class="quick-action__icon quick-action__icon--gold">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         </div>
         <span>Add Product</span>
       </a>
-      <a href="#" class="quick-action">
+      <a href="{{ route('admin.video-tours.create') }}" class="quick-action">
         <div class="quick-action__icon quick-action__icon--blue">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4V8z"/></svg>
         </div>
         <span>Add Video</span>
       </a>
-      <a href="#" class="quick-action">
+      <a href="{{ route('admin.pages.create') }}" class="quick-action">
         <div class="quick-action__icon quick-action__icon--green">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
         </div>
         <span>New Page</span>
       </a>
-      <a href="#" class="quick-action">
+      <a href="{{ route('admin.settings.index') }}" class="quick-action">
         <div class="quick-action__icon quick-action__icon--purple">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 110-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3h.1a1.6 1.6 0 001-1.5V3a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8v.1a1.6 1.6 0 001.5 1H21a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"/></svg>
         </div>
         <span>Site Settings</span>
       </a>

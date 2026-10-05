@@ -6,6 +6,13 @@
 <title>{{ setting('meta_title', 'Three Brothers Enterprises') }}</title>
 <meta name="description" content="{{ setting('meta_description') }}">
 <meta name="theme-color" content="#0A1F44">
+
+{{-- Favicons --}}
+<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/Three Brothers Global Export Emblem.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/Three Brothers Global Export Emblem.png') }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/Three Brothers Global Export Emblem.png') }}">
+<link rel="shortcut icon" href="{{ asset('img/Three Brothers Global Export Emblem.png') }}">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
@@ -35,6 +42,12 @@
   </div>
 </div>
 
+@if ($topBanners->isNotEmpty())
+  @foreach ($topBanners as $banner)
+    @include('partials.banner', ['banner' => $banner])
+  @endforeach
+@endif
+
 <!-- ================= HEADER ================= -->
 <header class="site-header" id="header">
   <div class="container">
@@ -46,26 +59,52 @@
             width="46" height="46"
             loading="eager">
 
-        @php
-            $fullName = setting('site_name', 'Three Brothers Enterprises');
-            $parts = explode(' ', $fullName, 2);
-            $first = $parts[0] ?? 'Three Brothers';
-            $second = $parts[1] ?? 'Enterprises';
-        @endphp
-
         <div class="logo-text">
-            <strong>{{ $first }}</strong>
-            <span>{{ $second }}</span>
+            <strong>Three Brothers</strong>
+            <span>Enterprises</span>
         </div>
         </a>
 
       <ul class="nav-links" id="navLinks">
         <li><a href="#home" class="active">Home</a></li>
         <li><a href="#about">About</a></li>
-        <li><a href="#infrastructure">Infrastructure</a></li>
-        <li><a href="#products">Products</a></li>
-        <li><a href="#markets">Markets</a></li>
-        <li><a href="#contact">Contact</a></li>
+
+        @if ($videoTours->isNotEmpty())
+          <li><a href="#infrastructure">Infrastructure</a></li>
+        @endif
+
+        @if ($categories->isNotEmpty())
+          <li><a href="#products">Products</a></li>
+        @endif
+
+        @if ($gccMarkets->isNotEmpty())
+          <li><a href="#markets">Markets</a></li>
+        @endif
+
+        @if ($pages->isNotEmpty())
+          <li class="has-dropdown">
+            <button type="button" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
+              Company
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+
+            <div class="nav-dropdown">
+              @foreach ($pages as $p)
+                <a href="{{ route('page.show', $p->slug) }}" class="nav-dropdown__item">
+                  {{ $p->title }}
+                </a>
+              @endforeach
+            </div>
+          </li>
+        @endif
+
+        <li>
+          <button type="button" class="nav-link-button" data-open-contact>
+            Contact
+          </button>
+        </li>
       </ul>
 
       <div class="nav-cta">
@@ -80,6 +119,12 @@
     </nav>
   </div>
 </header>
+
+@if ($heroBanners->isNotEmpty())
+  @foreach ($heroBanners as $banner)
+    @include('partials.banner', ['banner' => $banner])
+  @endforeach
+@else
 
 <!-- ================= HERO ================= -->
 <section class="hero" id="home">
@@ -98,11 +143,18 @@
         <a href="#infrastructure" class="btn btn-ghost">See Our Infrastructure</a>
       </div>
 
-      <ul class="hero-trust">
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg> 100% Halal Certified</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg> HACCP Compliant</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg> Air &amp; Sea Freight</li>
-      </ul>
+      @if ($certifications->isNotEmpty())
+        <ul class="hero-trust">
+          @foreach ($certifications->take(4) as $cert)
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+              {{ $cert->name }}
+            </li>
+          @endforeach
+        </ul>
+      @endif
     </div>
 
     <aside class="hero-card">
@@ -113,7 +165,11 @@
         </div>
       </div>
       <h3>Our Export Portfolio</h3>
-      <p class="sub">Four product lines · One trusted export partner</p>
+      <p class="sub">
+        {{ $stats['categories'] }}
+        {{ Str::plural('product line', $stats['categories']) }}
+        · One trusted export partner
+      </p>
       <ul class="spec">
         <li>
           <span class="k">
@@ -147,6 +203,7 @@
     </aside>
   </div>
 </section>
+@endif
 
 <!-- ================= STATS ================= -->
 <div class="stats">
@@ -246,6 +303,7 @@
   </div>
 </section>
 
+@if ($videoTours->isNotEmpty())
 <!-- ================= INFRASTRUCTURE / VIDEO TOUR ================= -->
 <section class="infra" id="infrastructure">
   <div class="container">
@@ -319,7 +377,9 @@
     </p>
   </div>
 </section>
+@endif
 
+@if ($categories->isNotEmpty())
 <!-- ================= PRODUCTS ================= -->
 <section class="products" id="products">
   <div class="container">
@@ -335,75 +395,142 @@
     <div class="prod-grid">
     @foreach ($categories as $index => $category)
         @php
-        // Category has one or more products; we show the first (primary) one
-        $product = $category->activeProducts->first();
-        if (!$product) continue;
+            // Category has one or more products; we show the first (primary) one
+            $product = $category->activeFeaturedProducts->first();
+            if (!$product) continue;
 
-        // Reveal delay class
-        $revealClass = $index === 0 ? '' : ' d' . min($index, 3);
+            // Reveal delay class
+            $revealClass = $index === 0 ? '' : ' d' . min($index, 3);
 
-        // Icon SVG per category slug
-        $iconSlug = $category->slug;
+            // Icon SVG per category slug
+            $iconSlug = $category->slug;
 
-          // Pick the primary image (or first available)
-        $image = $product->images->firstWhere('is_primary', true) 
-                ?? $product->images->first();
-        $imageUrl = $image?->url;
+            // Collect images for the carousel (already sorted: primary first, then sort_order)
+            $productImages = $product->images;
 
-        // If an image exists, use it as the background, otherwise fall back to the
-        // category's gradient class (e.g. "prod-top garments")
-        $topClass = $imageUrl ? 'prod-top has-image' : 'prod-top ' . $category->gradient_class;
+            if ($productImages->isEmpty()) {
+                // Fallback: single slide with no-image.png
+                $slides = [[
+                    'url' => asset('img/no-image.png'),
+                    'alt' => $product->name,
+                ]];
+            } else {
+                $slides = $productImages->map(fn ($img) => [
+                    'url' => $img->url,
+                    'alt' => $img->alt ?: $product->name,
+                ])->all();
+            }
 
-        // Inline background-image only when we have a URL
-        $topStyle = $imageUrl ? 'style="background-image:url(\'' . e($imageUrl) . '\')"' : '';
+            $slideCount  = count($slides);
+            $hasMultiple = $slideCount > 1;
         @endphp
 
         <article class="prod reveal{{ $revealClass }}">
-        <div class="{{ $topClass }}" {!! $topStyle !!}>
-            <div class="prod-head">
-            <span class="prod-tag">{{ $product->tagline ?? $category->tagline }}</span>
-            <span class="prod-ico">
-                @switch($iconSlug)
-                @case('meat')
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
-                    @break
-                @case('garments')
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4l4 2 4-2 4 3-2 3v10H6V10L4 7z"/></svg>
-                    @break
-                @case('rice')
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M5 9c2 0 3.5 1.5 3.5 3.5S7 16 5 16M19 9c-2 0-3.5 1.5-3.5 3.5S17 16 19 16"/></svg>
-                    @break
-                @case('vegetables')
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.9-6 5-7"/></svg>
-                    @break
-                @default
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/></svg>
-                @endswitch
-            </span>
-            </div>
-            <h3>{{ $product->name }}</h3>
-            <p>{{ $product->short_description }}</p>
-        </div>
+            <div class="prod-top has-image">
 
-        <div class="prod-body">
-            <h4>Available {{ $category->slug === 'meat' ? 'Cuts' : ($category->slug === 'rice' ? 'Varieties' : 'Range') }}</h4>
-            <div class="cuts">
-            @foreach ($product->varieties as $variety)
-                <span>{{ $variety->name }}</span>
-            @endforeach
+                <div class="prod-carousel"
+                    data-carousel
+                    data-slide-count="{{ $slideCount }}">
+
+                    {{-- All slides stacked; only the active one is visible --}}
+                    @foreach ($slides as $i => $slide)
+                        <img src="{{ $slide['url'] }}"
+                            alt="{{ $slide['alt'] }}"
+                            class="prod-carousel__slide {{ $i === 0 ? 'is-active' : '' }}"
+                            loading="{{ $i === 0 ? 'eager' : 'lazy' }}"
+                            decoding="async"
+                            width="800" height="500"
+                            data-index="{{ $i }}">
+                    @endforeach
+
+                    {{-- Navigation arrows (only when 2+ images) --}}
+                    @if ($hasMultiple)
+                        <button type="button"
+                                class="prod-carousel__nav prod-carousel__nav--prev"
+                                aria-label="Previous image"
+                                data-carousel-prev>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                        </button>
+
+                        <button type="button"
+                                class="prod-carousel__nav prod-carousel__nav--next"
+                                aria-label="Next image"
+                                data-carousel-next>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M9 6l6 6-6 6"/>
+                            </svg>
+                        </button>
+
+                        {{-- Dot indicators --}}
+                        <div class="prod-carousel__dots" data-carousel-dots role="tablist">
+                            @foreach ($slides as $i => $slide)
+                                <button type="button"
+                                        class="prod-carousel__dot {{ $i === 0 ? 'is-active' : '' }}"
+                                        aria-label="Go to image {{ $i + 1 }}"
+                                        data-carousel-dot="{{ $i }}"
+                                        role="tab"></button>
+                            @endforeach
+                        </div>
+                    @endif
+
+                </div>
+
+                <span class="prod-top__overlay" aria-hidden="true"></span>
+
+                <div class="prod-head">
+                    <span class="prod-tag">{{ $product->tagline ?? $category->tagline }}</span>
+                    <span class="prod-ico">
+                        @switch($iconSlug)
+                            @case('meat')
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
+                                @break
+                            @case('garments')
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4l4 2 4-2 4 3-2 3v10H6V10L4 7z"/></svg>
+                                @break
+                            @case('rice')
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M5 9c2 0 3.5 1.5 3.5 3.5S7 16 5 16M19 9c-2 0-3.5 1.5-3.5 3.5S17 16 19 16"/></svg>
+                                @break
+                            @case('vegetables')
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.9-6 5-7"/></svg>
+                                @break
+                            @default
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/></svg>
+                        @endswitch
+                    </span>
+                </div>
+
+                <h3>{{ $product->name }}</h3>
+                <p>{{ $product->short_description }}</p>
             </div>
 
-            <div class="prod-spec">
-            @foreach ($product->specs as $spec)
-                <div><strong>{{ $spec->value }}</strong>{{ $spec->label }}</div>
-            @endforeach
+            <div class="prod-body">
+                <h4>Available {{ $category->slug === 'meat' ? 'Cuts' : ($category->slug === 'rice' ? 'Varieties' : 'Range') }}</h4>
+                <div class="cuts">
+                    @foreach ($product->varieties as $variety)
+                        <span>{{ $variety->name }}</span>
+                    @endforeach
+                </div>
+
+                <div class="prod-spec">
+                    @foreach ($product->specs as $spec)
+                        <div><strong>{{ $spec->value }}</strong>{{ $spec->label }}</div>
+                    @endforeach
+                </div>
             </div>
-        </div>
         </article>
     @endforeach
     </div>
   </div>
 </section>
+@endif
+
+@if ($middleBanners->isNotEmpty())
+  @foreach ($middleBanners as $banner)
+    @include('partials.banner', ['banner' => $banner])
+  @endforeach
+@endif
 
 <!-- ================= PROCESS ================= -->
 <section class="process" id="process">
@@ -506,6 +633,151 @@
   </div>
 </section>
 
+@if ($testimonials->isNotEmpty())
+<!-- ================= TESTIMONIALS ================= -->
+<section class="testimonials" id="testimonials">
+  <div class="container">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Client Voices</span>
+      <h2 class="sec-title">Trusted by Importers Worldwide</h2>
+      <p class="sec-sub">
+        Real feedback from buyers across the GCC and beyond.
+      </p>
+    </div>
+
+    <div class="test-grid">
+      @foreach ($testimonials as $index => $t)
+        <article class="test-card reveal{{ $index === 0 ? '' : ' d' . min($index, 4) }}">
+
+          {{-- Star row --}}
+          <div class="test-card__stars">
+            @for ($i = 1; $i <= 5; $i++)
+              <svg viewBox="0 0 24 24" class="{{ $i <= $t->rating ? 'is-on' : 'is-off' }}">
+                <path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/>
+              </svg>
+            @endfor
+          </div>
+
+          {{-- Decorative quote mark --}}
+          <svg class="test-card__quote-mark" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+            <path d="M7.5 8C4.5 8 2 10.5 2 13.5S4.5 19 7.5 19c.4 0 .8 0 1.2-.1-.6 1.9-2.2 3.3-4.2 3.6l.4 2.5c4.5-.6 8-4.4 8-9v-1.5C12.9 10.5 10.5 8 7.5 8zm17 0C21.5 8 19 10.5 19 13.5S21.5 19 24.5 19c.4 0 .8 0 1.2-.1-.6 1.9-2.2 3.3-4.2 3.6l.4 2.5c4.5-.6 8-4.4 8-9v-1.5C29.9 10.5 27.5 8 24.5 8z"/>
+          </svg>
+
+          {{-- Quote --}}
+          <p class="test-card__quote">"{{ $t->quote }}"</p>
+
+          {{-- Author --}}
+          <div class="test-card__author">
+            @if ($t->avatar)
+              <div class="test-card__avatar" style="background-image:url('{{ asset($t->avatar) }}')"></div>
+            @else
+              <div class="test-card__avatar test-card__avatar--initials">
+                {{ strtoupper(substr($t->client_name, 0, 1)) }}
+              </div>
+            @endif
+
+            <div class="test-card__author-meta">
+              <strong>{{ $t->client_name }}</strong>
+
+              @if ($t->position || $t->company)
+                <span class="test-card__role">
+                  {{ $t->position }}@if ($t->position && $t->company), @endif{{ $t->company }}
+                </span>
+              @endif
+
+              @if ($t->country)
+                <span class="test-card__country">
+                  {{ $t->country->flag_emoji }} {{ $t->country->name }}
+                </span>
+              @endif
+            </div>
+          </div>
+
+        </article>
+      @endforeach
+    </div>
+  </div>
+</section>
+@endif
+
+@if ($certifications->isNotEmpty())
+<!-- ================= CERTIFICATIONS ================= -->
+<section class="certifications" id="certifications">
+  <div class="container">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Certified Quality</span>
+      <h2 class="sec-title">Certifications You Can Trust</h2>
+      <p class="sec-sub">
+        Our operations are independently audited and certified. Every consignment ships with the
+        documentation that proves it.
+      </p>
+    </div>
+
+    <div class="cert-grid">
+      @foreach ($certifications as $index => $cert)
+        @php
+          $revealClass = $index === 0 ? '' : ' d' . min($index, 4);
+          $isExpired   = $cert->expires_on && $cert->expires_on->isPast();
+        @endphp
+
+        <article class="cert-card reveal{{ $revealClass }}">
+          <div class="cert-card__logo">
+            @if ($cert->logo)
+              <img src="{{ asset($cert->logo) }}"
+                   alt="{{ $cert->name }} logo"
+                   loading="lazy"
+                   decoding="async">
+            @else
+              <div class="cert-card__logo-fallback">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <path d="M12 2l8 4v6c0 5-3.4 8.8-8 10-4.6-1.2-8-5-8-10V6z"/>
+                  <path d="M9 12l2 2 4-4"/>
+                </svg>
+              </div>
+            @endif
+          </div>
+
+          <h3 class="cert-card__name">{{ $cert->name }}</h3>
+
+          @if ($cert->issued_by)
+            <span class="cert-card__issuer">Issued by {{ $cert->issued_by }}</span>
+          @endif
+
+          @if ($cert->description)
+            <p class="cert-card__description">{{ $cert->description }}</p>
+          @endif
+
+          @if ($cert->certificate_number || $cert->expires_on)
+            <div class="cert-card__meta">
+              @if ($cert->certificate_number)
+                <span class="cert-card__number">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="16" rx="2"/>
+                    <path d="M3 10h18M8 4v16"/>
+                  </svg>
+                  {{ $cert->certificate_number }}
+                </span>
+              @endif
+
+              @if ($cert->expires_on)
+                <span class="cert-card__expiry {{ $isExpired ? 'is-expired' : '' }}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v5l3 2"/>
+                  </svg>
+                  {{ $isExpired ? 'Expired' : 'Valid until' }} {{ $cert->expires_on->format('M Y') }}
+                </span>
+              @endif
+            </div>
+          @endif
+        </article>
+      @endforeach
+    </div>
+  </div>
+</section>
+@endif
+
+@if ($gccMarkets->isNotEmpty())
 <!-- ================= MARKETS ================= -->
 <section class="markets" id="markets">
   <div class="container">
@@ -545,6 +817,7 @@
     </div>
   </div>
 </section>
+@endif
 
 <!-- ================= CONTACT ================= -->
 <section class="contact" id="contact">
@@ -596,7 +869,7 @@
           </div>
         </div>
       </div>
-
+      @if (setting('enable_quote_form', '1') == '1')
       <!-- FORM -->
       <div class="form-card reveal d1">
         <h3>Send an Enquiry</h3>
@@ -666,9 +939,119 @@
             @endif
         </form>
       </div>
+      @else
+        {{-- Fallback when the quote form is disabled --}}
+        <div class="form-card form-card--disabled reveal d1">
+          <div class="form-disabled">
+            <div class="form-disabled__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 8v5M12 16h.01"/>
+              </svg>
+            </div>
+            <h3>Enquiries Temporarily Paused</h3>
+            <p>
+              We're not accepting online enquiries right now. Please reach us directly at
+              <a href="mailto:{{ setting('contact_email', 'exports@threebrothers.com') }}">
+                {{ setting('contact_email', 'exports@threebrothers.com') }}
+              </a>
+              or call <a href="tel:{{ setting('contact_phone') }}">{{ setting('contact_phone') }}</a>.
+            </p>
+          </div>
+        </div>
+      @endif
     </div>
   </div>
 </section>
+
+@if ($footerBanners->isNotEmpty())
+  @foreach ($footerBanners as $banner)
+    @include('partials.banner', ['banner' => $banner])
+  @endforeach
+@endif
+
+
+@if (setting('enable_newsletter', '1') == '1')
+<!-- ================= NEWSLETTER ================= -->
+<section class="newsletter" id="newsletter">
+  <div class="container">
+    <div class="newsletter__inner">
+
+      <div class="newsletter__copy">
+        <span class="newsletter__eyebrow">Stay Updated</span>
+        <h2 class="newsletter__title">Get export updates in your inbox</h2>
+        <p class="newsletter__subtitle">
+          Seasonal offerings, new product lines and shipping announcements — sent occasionally, never spam.
+        </p>
+      </div>
+
+      <div class="newsletter__form-wrap">
+        @if (session('newsletter_success'))
+          <div class="newsletter__flash newsletter__flash--success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            <span>{{ session('newsletter_success') }}</span>
+          </div>
+        @endif
+
+        @if (session('newsletter_info'))
+          <div class="newsletter__flash newsletter__flash--info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M12 8h.01M11 12h1v4h1"/>
+            </svg>
+            <span>{{ session('newsletter_info') }}</span>
+          </div>
+        @endif
+
+        @if ($errors->has('email'))
+          <div class="newsletter__flash newsletter__flash--error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v5M12 16h.01"/>
+            </svg>
+            <span>{{ $errors->first('email') }}</span>
+          </div>
+        @endif
+
+        <form method="POST"
+              action="{{ route('newsletter.subscribe') }}"
+              class="newsletter__form"
+              novalidate>
+          @csrf
+
+          <div class="newsletter__field">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="newsletter__field-icon">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M2 7l10 6 10-6"/>
+            </svg>
+            <input type="email"
+                   name="email"
+                   placeholder="your@email.com"
+                   required
+                   autocomplete="email"
+                   value="{{ old('email') }}"
+                   class="{{ $errors->has('email') ? 'is-invalid' : '' }}">
+          </div>
+
+          <button type="submit" class="newsletter__submit">
+            Subscribe
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </button>
+        </form>
+
+        <p class="newsletter__note">
+          By subscribing you agree to receive occasional emails. Unsubscribe anytime.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+@endif
 
 <!-- ================= FOOTER ================= -->
 <footer>
@@ -682,16 +1065,9 @@
             width="46" height="46"
             loading="lazy">
 
-        @php
-            $fullName = setting('site_name', 'Three Brothers Enterprises');
-            $parts = explode(' ', $fullName, 2);
-            $first = $parts[0] ?? 'Three Brothers';
-            $second = $parts[1] ?? 'Enterprises';
-        @endphp
-
         <div class="logo-text">
-            <strong style="color:#fff">{{ $first }}</strong>
-            <span>{{ $second }}</span>
+            <strong>Three Brothers</strong>
+            <span>Enterprises</span>
         </div>
         </div>
         <p>
@@ -731,7 +1107,7 @@
           <a href="#products">Products</a>
           <a href="#process">Our Process</a>
           <a href="#markets">Export Markets</a>
-          <a href="#contact">Contact</a>
+          <a href="#" data-open-contact>Contact</a>
         </div>
       </div>
 
@@ -790,6 +1166,160 @@
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm0 18a8 8 0 01-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.8c-.24-.12-1.4-.7-1.62-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.92-1.18-.7-.63-1.18-1.4-1.32-1.64-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.46-.4-.4-.54-.4h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.64.58.25 1.02.4 1.37.51.58.18 1.1.16 1.52.1.46-.07 1.4-.57 1.6-1.12.2-.55.2-1.02.14-1.12-.06-.1-.22-.16-.46-.28z"/></svg>
 </a>
 
+{{-- ================= CONTACT MODAL ================= --}}
+<div class="contact-modal" id="contactModal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="contact-modal__backdrop" data-close-contact></div>
+
+  <div class="contact-modal__box">
+
+    <button type="button" class="contact-modal__close" data-close-contact aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div class="contact-modal__grid">
+
+      {{-- LEFT: info --}}
+      <div class="contact-modal__info">
+        <span class="contact-modal__eyebrow">Get in Touch</span>
+        <h2 class="contact-modal__title">Contact Our Export Desk</h2>
+        <p class="contact-modal__subtitle">
+          We're available six days a week to discuss your requirements, samples and shipping schedules.
+        </p>
+
+        <ul class="contact-modal__list">
+          <li>
+            <div class="contact-modal__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>
+            </div>
+            <div>
+              <span>Phone / WhatsApp</span>
+              <a href="tel:{{ setting('contact_phone', '+923000000000') }}">
+                {{ setting('contact_phone', '+92 300 000 0000') }}
+              </a>
+            </div>
+          </li>
+
+          <li>
+            <div class="contact-modal__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/></svg>
+            </div>
+            <div>
+              <span>Email</span>
+              <a href="mailto:{{ setting('contact_email', 'exports@threebrothers.com') }}">
+                {{ setting('contact_email', 'exports@threebrothers.com') }}
+              </a>
+            </div>
+          </li>
+
+          <li>
+            <div class="contact-modal__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <span>Head Office</span>
+              <b>Karachi, Sindh, Pakistan</b>
+            </div>
+          </li>
+
+          <li>
+            <div class="contact-modal__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+            </div>
+            <div>
+              <span>Business Hours</span>
+              <b>Mon – Sat · 9:00 AM – 7:00 PM (PKT)</b>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      {{-- RIGHT: form --}}
+      <div class="contact-modal__form-wrap">
+        <h3 class="contact-modal__form-title">Send an Enquiry</h3>
+        <p class="contact-modal__form-sub">Fill in the details and we'll get back within one business day.</p>
+
+        @if (setting('enable_quote_form', '1') == '1')
+          <form action="{{ route('contact.store') }}" method="POST" class="contact-modal__form" novalidate>
+            @csrf
+
+            <div class="contact-modal__field">
+              <label for="modal_name">Full Name *</label>
+              <input type="text" id="modal_name" name="name" placeholder="Your name" required>
+            </div>
+
+            <div class="contact-modal__field">
+              <label for="modal_email">Email *</label>
+              <input type="email" id="modal_email" name="email" placeholder="you@company.com" required>
+            </div>
+
+            <div class="contact-modal__field">
+              <label for="modal_phone">Phone / WhatsApp</label>
+              <input type="tel" id="modal_phone" name="phone" placeholder="+966 5X XXX XXXX">
+            </div>
+
+            <div class="contact-modal__field">
+              <label for="modal_subject">Subject</label>
+              <input type="text" id="modal_subject" name="subject"
+                    placeholder="e.g. Halal beef enquiry — 20 MT"
+                    maxlength="160">
+            </div>
+
+            <div class="contact-modal__field">
+              <label for="modal_message">Your Requirement</label>
+              <textarea id="modal_message" name="message" rows="3"
+                        placeholder="Tell us about products, quantity, packaging and delivery schedule…"></textarea>
+            </div>
+
+            @if (session('contact_success'))
+              <div class="contact-modal__flash contact-modal__flash--success">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+                <span>{{ session('contact_success') }}</span>
+              </div>
+            @endif
+
+            @if ($errors->any())
+              <div class="contact-modal__flash contact-modal__flash--error">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 8v5M12 16h.01"/>
+                </svg>
+                <span>{{ $errors->first() }}</span>
+              </div>
+            @endif
+
+            <button type="submit" class="contact-modal__submit">
+              Submit Enquiry
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>
+              </svg>
+            </button>
+
+            <p class="contact-modal__note">* Required fields. Your information is kept confidential.</p>
+          </form>
+        @else
+          <div class="contact-modal__paused">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M12 8v5M12 16h.01"/>
+            </svg>
+            <h3>Enquiries Temporarily Paused</h3>
+            <p>Please contact us directly at
+              <a href="mailto:{{ setting('contact_email') }}">{{ setting('contact_email') }}</a>
+              or <a href="tel:{{ setting('contact_phone') }}">{{ setting('contact_phone') }}</a>.
+            </p>
+          </div>
+        @endif
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="{{ asset('js/contactModal.js') }}" defer></script>
 <script src="{{ asset('js/home.js') }}" defer></script>
 
 </body>

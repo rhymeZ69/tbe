@@ -17,8 +17,9 @@ class Country extends Model
         'is_active'   => 'boolean',
     ];
 
-    public function scopeGcc($q)  { return $q->where('is_gcc', true); }
-    public function scopeActive($q) { return $q->where('is_active', true); }
+    public function scopeGcc($q)      { return $q->where('is_gcc', true); }
+    public function scopeActive($q)   { return $q->where('is_active', true); }
+    public function scopeFeatured($q) { return $q->where('is_featured', true); }
 
     public function testimonials()
     {

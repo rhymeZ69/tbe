@@ -42,6 +42,14 @@ class ProductCategory extends Model
                     ->orderBy('sort_order');
     }
 
+    public function activeFeaturedProducts()
+    {
+        return $this->hasMany(Product::class, 'category_id')
+                    ->where('is_active', true)
+                    ->where('is_featured', true)
+                    ->orderBy('sort_order');
+    }
+
     /* ---------- Scopes ---------- */
 
     public function scopeActive($q)
